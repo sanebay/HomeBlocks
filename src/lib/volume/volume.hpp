@@ -135,15 +135,18 @@ public:
     virtual ~Volume() = default;
 
     // static APIs exposed to HomeBlks Implementation Layer;
-    static VolumePtr make_volume(sisl::byte_view const& buf, void* cookie, shared< VolumeChunkSelector > chunk_sel) {
+    static VolumePtr make_volume(sisl::byte_view const& buf, void* cookie,
+                                 shared< VolumeChunkSelector > volume_chunk_sel,
+                                 shared< VolumeChunkSelector > index_chunk_sel) {
         auto vol = std::make_shared< Volume >(buf, cookie);
-        auto ret = vol->init(true /*is_recovery*/, chunk_sel);
+        auto ret = vol->init(true /*is_recovery*/, volume_chunk_sel, index_chunk_sel);
         return ret ? vol : nullptr;
     }
 
-    static VolumePtr make_volume(VolumeInfo&& info, shared< VolumeChunkSelector > chunk_sel) {
+    static VolumePtr make_volume(VolumeInfo&& info, shared< VolumeChunkSelector > volume_chunk_sel,
+                                 shared< VolumeChunkSelector > index_chunk_sel) {
         auto vol = std::make_shared< Volume >(std::move(info));
-        auto ret = vol->init(false /* is_recovery */, chunk_sel);
+        auto ret = vol->init(false /* is_recovery */, volume_chunk_sel, index_chunk_sel);
         // in failure case, volume shared ptr will be destroyed automatically;
         return ret ? vol : nullptr;
     }
@@ -159,7 +162,8 @@ public:
     //
     // Initialize index table for this volume and saves the index handle in the volume object;
     //
-    shared< VolumeIndexTable > init_index_table(bool is_recovery, shared< VolumeIndexTable > tbl = nullptr);
+    shared< VolumeIndexTable > init_index_table(bool is_recovery, shared< VolumeChunkSelector > index_chunk_selector,
+                                                shared< VolumeIndexTable > tbl = nullptr);
 
     void destroy(shared< VolumeChunkSelector > chunk_sel);
 
@@ -196,7 +200,8 @@ private:
     // init is synchronous and will return false in case of failure to create repl dev and volume instance will be
     // destroyed automatically; if success, the repl dev will be stored in the volume object;
     //
-    bool init(bool is_recovery, shared< VolumeChunkSelector > chunk_selector);
+    bool init(bool is_recovery, shared< VolumeChunkSelector > volume_chunk_selector,
+              shared< VolumeChunkSelector > index_chunk_selector);
 
     VolumeManager::Result< folly::Unit > verify_checksum(vol_read_ctx const& read_ctx);
 

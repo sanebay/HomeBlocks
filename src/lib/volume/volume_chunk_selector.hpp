@@ -53,7 +53,7 @@ class VolumeChunkSelector : public homestore::ChunkSelector {
 
 public:
     using UpdateVolSbCb = std::function< void(uint64_t volume_ordinal, const std::vector< chunk_num_t >&) >;
-    VolumeChunkSelector(UpdateVolSbCb update_sb_cb);
+    VolumeChunkSelector(std::string module_name, UpdateVolSbCb update_sb_cb);
     ~VolumeChunkSelector() = default;
 
     std::vector< chunk_num_t > allocate_volume_chunks(uint64_t volume_ordinal, uint64_t volume_size);
@@ -97,6 +97,7 @@ private:
     std::mutex m_chunk_sel_mutex;
     UpdateVolSbCb m_update_vol_sb_cb;
     std::atomic< ResizeOp > resize_op{ResizeOp::Idle};
+    std::string m_module_name;
 };
 
 } // namespace homeblocks

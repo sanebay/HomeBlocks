@@ -74,6 +74,7 @@ private:
     superblk< homeblks_sb_t > sb_;
     peer_id_t our_uuid_;
     shared< VolumeChunkSelector > chunk_selector_;
+    shared< VolumeChunkSelector > index_chunk_selector_;
     std::unique_ptr< sisl::IDReserver > ordinal_reserver_;
 
 public:

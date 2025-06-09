@@ -23,7 +23,7 @@ namespace homeblocks {
 std::shared_ptr< VolumeManager > HomeBlocksImpl::volume_manager() { return shared_from_this(); }
 
 void HomeBlocksImpl::on_vol_meta_blk_found(sisl::byte_view const& buf, void* cookie) {
-    auto vol_ptr = Volume::make_volume(buf, cookie, chunk_selector_);
+    auto vol_ptr = Volume::make_volume(buf, cookie, chunk_selector_, index_chunk_selector_);
     auto id = vol_ptr->id();
 
     {
@@ -31,7 +31,7 @@ void HomeBlocksImpl::on_vol_meta_blk_found(sisl::byte_view const& buf, void* coo
         auto it = idx_tbl_map_.find(vol_ptr->id_str());
         DEBUG_ASSERT(it != idx_tbl_map_.end(), "index pid: {} not exists in recovery path, not expected!",
                      vol_ptr->id_str());
-        vol_ptr->init_index_table(true /*is_recovery*/, it->second /* table */);
+        vol_ptr->init_index_table(true /*is_recovery*/, index_chunk_selector_, it->second /* table */);
 
         // don't need it after volume is initialized with index table;
         idx_tbl_map_.erase(it);
@@ -81,7 +81,7 @@ VolumeManager::NullAsyncResult HomeBlocksImpl::create_volume(VolumeInfo&& vol_in
         }
     }
 
-    auto vol_ptr = Volume::make_volume(std::move(vol_info), chunk_selector_);
+    auto vol_ptr = Volume::make_volume(std::move(vol_info), chunk_selector_, index_chunk_selector_);
     if (vol_ptr) {
         auto lg = std::scoped_lock(vol_lock_);
         vol_map_.emplace(std::make_pair(id, vol_ptr));
