@@ -325,16 +325,16 @@ void HomeBlocksImpl::init_homestore() {
     if (fc_on()) {
         need_format = homestore::hs()
                           ->with_index_service(std::make_unique< HBIndexSvcCB >(this),
-                                               index_chunk_selector_) // custom index chunk selector
+                                               nullptr) // custom index chunk selector
                           .with_fault_containment(std::make_unique< HBFCSvcCB >(this))
-                          .with_repl_data_service(repl_app, volume_chunk_selector_) // custom volume chunk selector
+                          .with_repl_data_service(repl_app, nullptr) // custom volume chunk selector
                           .start(hs_input_params{.devices = device_info, .app_mem_size = app_mem_size},
                                  [this]() { register_metablk_cb(); });
     } else {
         need_format = homestore::hs()
                           ->with_index_service(std::make_unique< HBIndexSvcCB >(this),
-                                               index_chunk_selector_)               // custom index chunk selector
-                          .with_repl_data_service(repl_app, volume_chunk_selector_) // custom volume chunk selector
+                                               nullptr)              // custom index chunk selector
+                          .with_repl_data_service(repl_app, nullptr) // custom volume chunk selector
                           .start(hs_input_params{.devices = device_info, .app_mem_size = app_mem_size},
                                  [this]() { register_metablk_cb(); });
     }
@@ -358,14 +358,14 @@ void HomeBlocksImpl::init_homestore() {
                                   .size_pct = 45.0,
                                   .num_chunks = 0,
                                   .chunk_size = hs_chunk_sz.index,
-                                  .chunk_sel_type = chunk_selector_type_t::CUSTOM}},
+                                  .chunk_sel_type = chunk_selector_type_t::ROUND_ROBIN}},
                 {HS_SERVICE::REPLICATION,
                  hs_format_params{.dev_type = HSDevType::Data,
                                   .size_pct = 95.0,
                                   .num_chunks = 0, // num_chunks will be deduced from chunk_size
                                   .chunk_size = hs_chunk_sz.data,
                                   .block_size = DATA_BLK_SIZE,
-                                  .chunk_sel_type = chunk_selector_type_t::CUSTOM}},
+                                  .chunk_sel_type = chunk_selector_type_t::ROUND_ROBIN}},
             });
         } else {
             auto run_on_type = has_fast_dev ? homestore::HSDevType::Fast : homestore::HSDevType::Data;
@@ -379,14 +379,14 @@ void HomeBlocksImpl::init_homestore() {
                                   .size_pct = 5.0,
                                   .num_chunks = 0,
                                   .chunk_size = hs_chunk_sz.index,
-                                  .chunk_sel_type = chunk_selector_type_t::CUSTOM}},
+                                  .chunk_sel_type = chunk_selector_type_t::ROUND_ROBIN}},
                 {HS_SERVICE::REPLICATION,
                  hs_format_params{.dev_type = run_on_type,
                                   .size_pct = 75.0,
                                   .num_chunks = 0, // num_chunks will be deduced from chunk_size;
                                   .chunk_size = hs_chunk_sz.data,
                                   .block_size = DATA_BLK_SIZE,
-                                  .chunk_sel_type = chunk_selector_type_t::CUSTOM}},
+                                  .chunk_sel_type = chunk_selector_type_t::ROUND_ROBIN}},
             });
         }
         // repl_app->on_repl_devs_init_completed();

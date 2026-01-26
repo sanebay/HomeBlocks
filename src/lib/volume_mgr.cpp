@@ -62,11 +62,13 @@ shared< hs_index_table_t > HomeBlocksImpl::recover_index_table(homestore::superb
 
         LOGI("Recovering index table for  index_uuid: {}, parent_uuid: {}", boost::uuids::to_string(sb->uuid), pid_str);
         std::vector< chunk_num_t > chunk_ids(sb->get_chunk_ids(), sb->get_chunk_ids() + sb->index_num_chunks);
+#if 0
         bool success = index_chunk_selector_->recover_chunks(sb->ordinal, sb->pdev_id, sb->max_size_bytes, chunk_ids);
         if (!success) {
             LOGI("Failed to recover chunks for index table index_uuid: {}, parent_uuid: {} ordinal: {}",
                  boost::uuids::to_string(sb->uuid), pid_str, sb->ordinal);
         }
+#endif
         auto tbl = std::make_shared< VolumeIndexTable >(std::move(sb), cfg);
         idx_tbl_map_.emplace(pid_str, tbl);
         return tbl->index_table();
